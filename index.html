@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1878C8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-180.png"><title>Window Washing Sales Tracker</title>
+<style>
+  :root{
+    --bg:#F2F6F9; --surface:#FFFFFF; --surface2:#E9F0F5;
+    --ink:#142A3B; --ink2:#486276; --muted:#7C93A4;
+    --line:#D8E3EB; --accent:#1878C8; --accent-ink:#FFFFFF; --accent-soft:#E2EFFA;
+    --danger:#B3372E; --danger-soft:#F9E7E5;
+    --st-lead-bg:#E7ECF0;   --st-lead-fg:#4A6274;
+    --st-quoted-bg:#E2EFFA; --st-quoted-fg:#155F9E;
+    --st-sched-bg:#FBF0D9;  --st-sched-fg:#8A5E10;
+    --st-done-bg:#E0F2EA;   --st-done-fg:#1D6B4A;
+    --st-paid-bg:#1D6B4A;   --st-paid-fg:#FFFFFF;
+    --shadow:0 1px 3px rgba(20,42,59,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0E1B26; --surface:#152736; --surface2:#1D3347;
+      --ink:#E8F1F8; --ink2:#A7BCCC; --muted:#6E8698;
+      --line:#27415A; --accent:#4FA3E8; --accent-ink:#0B1B29; --accent-soft:#163B5C;
+      --danger:#E8776C; --danger-soft:#3A1F1C;
+      --st-lead-bg:#243A4D;   --st-lead-fg:#A7BCCC;
+      --st-quoted-bg:#163B5C; --st-quoted-fg:#8FC4EE;
+      --st-sched-bg:#3D3016;  --st-sched-fg:#E7C071;
+      --st-done-bg:#173A2C;   --st-done-fg:#7BC9A3;
+      --st-paid-bg:#2E8B62;   --st-paid-fg:#0B1B29;
+      --shadow:0 1px 3px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F2F6F9; --surface:#FFFFFF; --surface2:#E9F0F5;
+    --ink:#142A3B; --ink2:#486276; --muted:#7C93A4;
+    --line:#D8E3EB; --accent:#1878C8; --accent-ink:#FFFFFF; --accent-soft:#E2EFFA;
+    --danger:#B3372E; --danger-soft:#F9E7E5;
+    --st-lead-bg:#E7ECF0;   --st-lead-fg:#4A6274;
+    --st-quoted-bg:#E2EFFA; --st-quoted-fg:#155F9E;
+    --st-sched-bg:#FBF0D9;  --st-sched-fg:#8A5E10;
+    --st-done-bg:#E0F2EA;   --st-done-fg:#1D6B4A;
+    --st-paid-bg:#1D6B4A;   --st-paid-fg:#FFFFFF;
+    --shadow:0 1px 3px rgba(20,42,59,.08);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1B26; --surface:#152736; --surface2:#1D3347;
+    --ink:#E8F1F8; --ink2:#A7BCCC; --muted:#6E8698;
+    --line:#27415A; --accent:#4FA3E8; --accent-ink:#0B1B29; --accent-soft:#163B5C;
+    --danger:#E8776C; --danger-soft:#3A1F1C;
+    --st-lead-bg:#243A4D;   --st-lead-fg:#A7BCCC;
+    --st-quoted-bg:#163B5C; --st-quoted-fg:#8FC4EE;
+    --st-sched-bg:#3D3016;  --st-sched-fg:#E7C071;
+    --st-done-bg:#173A2C;   --st-done-fg:#7BC9A3;
+    --st-paid-bg:#2E8B62;   --st-paid-fg:#0B1B29;
+    --shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:15px/1.5 "Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+  }
+  .num{font-variant-numeric:tabular-nums}
+
+  header.app{
+    background:var(--surface); border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:20;
+  }
+  .brandrow{
+    max-width:960px; margin:0 auto; padding:14px 16px 6px;
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .brandrow h1{font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em}
+  .brandrow .sub{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
+  nav.tabs{
+    max-width:960px; margin:0 auto; padding:0 8px;
+    display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  }
+  nav.tabs button{
+    appearance:none; border:0; background:none; cursor:pointer;
+    font:inherit; font-size:14px; font-weight:600; color:var(--ink2);
+    padding:10px 12px 12px; border-bottom:3px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+  nav.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:6px}
+
+  main{max-width:960px; margin:0 auto; padding:18px 16px 80px}
+  section.view{display:none}
+  section.view.active{display:block}
+  h2{font-size:21px; margin:4px 0 14px; letter-spacing:-.01em; text-wrap:balance}
+  h3{font-size:15px; margin:0 0 10px}
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow); padding:16px;
+  }
+  .grid-tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px}
+  .tile{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px 14px; box-shadow:var(--shadow)}
+  .tile .label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px}
+  .tile .value{font-size:24px; font-weight:700; letter-spacing:-.01em}
+  .tile .hint{font-size:12px; color:var(--ink2); margin-top:2px}
+
+  .stack{display:flex; flex-direction:column; gap:12px}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:560px){ .row2{grid-template-columns:1fr} }
+
+  label.field{display:flex; flex-direction:column; gap:5px; font-size:13px; font-weight:600; color:var(--ink2)}
+  input,select,textarea{
+    font:inherit; color:var(--ink); background:var(--bg);
+    border:1px solid var(--line); border-radius:8px; padding:9px 11px; width:100%;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+  textarea{resize:vertical; min-height:64px}
+
+  .btn{
+    appearance:none; font:inherit; font-weight:600; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:9px 16px;
+  }
+  .btn:hover{background:var(--surface2)}
+  .btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.danger{color:var(--danger); border-color:var(--danger)}
+  .btn.danger:hover{background:var(--danger-soft)}
+  .btn.small{padding:5px 10px; font-size:13px; border-radius:7px}
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+
+  .pill{
+    display:inline-block; font-size:12px; font-weight:700; letter-spacing:.02em;
+    padding:2px 9px; border-radius:99px; white-space:nowrap;
+  }
+  .pill.Lead{background:var(--st-lead-bg); color:var(--st-lead-fg)}
+  .pill.Quoted{background:var(--st-quoted-bg); color:var(--st-quoted-fg)}
+  .pill.Scheduled{background:var(--st-sched-bg); color:var(--st-sched-fg)}
+  .pill.Completed{background:var(--st-done-bg); color:var(--st-done-fg)}
+  .pill.Paid{background:var(--st-paid-bg); color:var(--st-paid-fg)}
+
+  .sale{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow); padding:12px 14px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .sale .top{display:flex; justify-content:space-between; gap:10px; align-items:baseline}
+  .sale .who{font-weight:700}
+  .sale .price{font-weight:700; font-size:16px}
+  .sale .meta{font-size:13px; color:var(--ink2); display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center}
+  .sale .notes{font-size:13px; color:var(--muted)}
+  .sale .actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:2px}
+
+  .filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+  .filters input[type="search"]{flex:2 1 180px; min-width:0; width:auto}
+  .filters select{flex:1 1 130px; min-width:0; width:auto}
+
+  .bars{display:flex; flex-direction:column; gap:10px}
+  .barrow .toprow{display:flex; justify-content:space-between; font-size:13px; margin-bottom:3px}
+  .barrow .name{color:var(--ink2); font-weight:600}
+  .barrow .val{font-weight:700}
+  .bartrack{background:var(--surface2); border-radius:4px; height:10px; overflow:hidden}
+  .barfill{background:var(--accent); height:100%; border-radius:0 4px 4px 0; min-width:2px}
+  .seg{display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:12px}
+  .seg button{appearance:none; border:0; background:var(--surface); color:var(--ink2); font:inherit; font-size:13px; font-weight:600; padding:6px 12px; cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--accent-soft); color:var(--accent)}
+
+  details.cust{background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow)}
+  details.cust summary{
+    list-style:none; cursor:pointer; padding:12px 14px;
+    display:flex; justify-content:space-between; gap:10px; align-items:baseline;
+  }
+  details.cust summary::-webkit-details-marker{display:none}
+  details.cust .body{padding:0 14px 12px; border-top:1px solid var(--line)}
+  details.cust .cmeta{font-size:13px; color:var(--ink2); padding-top:10px; display:flex; flex-direction:column; gap:3px}
+  details.cust .hist{margin-top:10px; display:flex; flex-direction:column; gap:6px}
+  details.cust .hist .h{display:flex; justify-content:space-between; gap:8px; font-size:13px}
+
+  .empty{
+    border:1.5px dashed var(--line); border-radius:10px; padding:26px 18px;
+    text-align:center; color:var(--muted); font-size:14px;
+  }
+  .note{font-size:13px; color:var(--ink2); line-height:1.55}
+  .note strong{color:var(--ink)}
+
+  #toast{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(8px);
+    background:var(--ink); color:var(--bg); font-size:14px; font-weight:600;
+    padding:10px 18px; border-radius:99px; opacity:0; pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease; z-index:50; max-width:90vw;
+  }
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  @media (prefers-reduced-motion: reduce){ #toast{transition:none} }
+</style>
+
+<header class="app">
+  <div class="brandrow">
+    <h1>Window Washing Tracker</h1>
+    <span class="sub">Customers &amp; Sales</span>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true"  data-view="dashboard">Dashboard</button>
+    <button role="tab" aria-selected="false" data-view="new">+ New Sale</button>
+    <button role="tab" aria-selected="false" data-view="sales">Sales</button>
+    <button role="tab" aria-selected="false" data-view="customers">Customers</button>
+    <button role="tab" aria-selected="false" data-view="data">Data</button>
+  </nav>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <h2>Dashboard</h2>
+    <div class="grid-tiles" id="tiles"></div>
+    <div class="card" style="margin-bottom:14px">
+      <h3>Revenue by team member</h3>
+      <div class="seg" role="group" aria-label="Leaderboard range">
+        <button id="lb-month" aria-pressed="true">This month</button>
+        <button id="lb-all" aria-pressed="false">All time</button>
+      </div>
+      <div class="bars" id="leaderboard"></div>
+      <p class="note" id="lb-note" style="margin:10px 0 0">Counts jobs marked Completed or Paid.</p>
+    </div>
+    <div class="card">
+      <h3>Recent activity</h3>
+      <div class="stack" id="recent"></div>
+    </div>
+  </section>
+
+  <!-- NEW / EDIT SALE -->
+  <section class="view" id="view-new">
+    <h2 id="form-title">Log a sale</h2>
+    <form class="card stack" id="sale-form" novalidate>
+      <div class="row2">
+        <label class="field">Your name (salesperson)
+          <input name="employee" list="emp-list" required placeholder="e.g. Asher" autocomplete="off">
+        </label>
+        <label class="field">Date
+          <input name="date" type="date" required>
+        </label>
+      </div>
+      <div class="row2">
+        <label class="field">Customer name
+          <input name="customer" required placeholder="Jane Smith">
+        </label>
+        <label class="field">Phone
+          <input name="phone" type="tel" placeholder="(555) 555-1234">
+        </label>
+      </div>
+      <div class="row2">
+        <label class="field">Email
+          <input name="email" type="email" placeholder="jane@email.com">
+        </label>
+        <label class="field">Address
+          <input name="address" placeholder="123 Main St">
+        </label>
+      </div>
+      <div class="row2">
+        <label class="field">Service
+          <select name="service">
+            <option>Exterior windows</option>
+            <option>Interior + exterior windows</option>
+            <option>Screens</option>
+            <option>Gutter cleaning</option>
+            <option>Pressure washing</option>
+            <option>Solar panel cleaning</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label class="field">Selling price ($)
+          <input name="price" type="number" min="0" step="0.01" inputmode="decimal" required placeholder="0.00">
+        </label>
+      </div>
+      <div class="row2">
+        <label class="field">Job cost ($) — supplies, labor, gas
+          <input name="cost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+        </label>
+        <label class="field">Status
+          <select name="status">
+            <option>Lead</option>
+            <option>Quoted</option>
+            <option selected>Scheduled</option>
+            <option>Completed</option>
+            <option>Paid</option>
+          </select>
+        </label>
+      </div>
+      <label class="field">Notes
+        <textarea name="notes" rows="2" placeholder="Gate code, pets, follow-up date…"></textarea>
+      </label>
+      <div class="btnrow">
+        <button class="btn primary" type="submit" id="save-btn">Save sale</button>
+        <button class="btn" type="button" id="cancel-edit" hidden>Cancel edit</button>
+      </div>
+    </form>
+    <datalist id="emp-list"></datalist>
+  </section>
+
+  <!-- SALES LIST -->
+  <section class="view" id="view-sales">
+    <h2>All sales</h2>
+    <div class="filters">
+      <input type="search" id="f-search" placeholder="Search customer, address, notes…" aria-label="Search sales">
+      <select id="f-emp" aria-label="Filter by team member"><option value="">Everyone</option></select>
+      <select id="f-status" aria-label="Filter by status">
+        <option value="">Any status</option>
+        <option>Lead</option><option>Quoted</option><option>Scheduled</option>
+        <option>Completed</option><option>Paid</option>
+      </select>
+    </div>
+    <div class="stack" id="sales-list"></div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section class="view" id="view-customers">
+    <h2>Customers</h2>
+    <div class="filters">
+      <input type="search" id="c-search" placeholder="Search customers…" aria-label="Search customers">
+    </div>
+    <div class="stack" id="cust-list"></div>
+  </section>
+
+  <!-- DATA -->
+  <section class="view" id="view-data">
+    <h2>Data &amp; team sharing</h2>
+    <div class="stack">
+      <div class="card stack">
+        <h3>How sharing works</h3>
+        <p class="note" style="margin:0">
+          Everything you enter is saved <strong>on this device</strong> automatically — it stays put
+          when you close and reopen the app. Entries are <strong>not synced live</strong> between
+          phones. To combine the team's numbers: each person taps <strong>Backup file</strong> below
+          and texts or emails it over, then the owner taps <strong>Import &amp; merge</strong> on
+          their device. Merging is safe to repeat — duplicates are matched up, and the newest edit
+          of each sale wins.
+        </p>
+      </div>
+      <div class="card stack">
+        <h3>Export</h3>
+        <div class="btnrow">
+          <button class="btn primary" id="btn-backup">Backup file (.json)</button>
+          <button class="btn" id="btn-csv">Spreadsheet export (.txt)</button>
+        </div>
+        <p class="note" style="margin:0">The spreadsheet export is CSV inside a .txt file —
+        rename it to <strong>.csv</strong> and it opens in Excel or Google Sheets.</p>
+      </div>
+      <div class="card stack">
+        <h3>Import &amp; merge</h3>
+        <div class="btnrow">
+          <label class="btn" for="import-file" style="display:inline-block">Import &amp; merge a backup…</label>
+          <input type="file" id="import-file" accept=".json,application/json" hidden>
+        </div>
+        <p class="note" id="import-result" style="margin:0"></p>
+      </div>
+      <div class="card stack">
+        <h3>Danger zone</h3>
+        <div class="btnrow">
+          <button class="btn danger" id="btn-wipe">Erase all data on this device</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var LS_KEY = "wwt_sales_v1";
+  var STATUSES = ["Lead","Quoted","Scheduled","Completed","Paid"];
+  var sales = load();
+  var editingId = null;
+  var lbRange = "month";
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(LS_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+  function persist(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(sales)); }
+    catch(e){ toast("Could not save — device storage may be full"); }
+  }
+  function uid(){
+    return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+      : "id-" + Date.now() + "-" + Math.random().toString(36).slice(2,10);
+  }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  var fmtUSD = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
+  function money(n){ return fmtUSD.format(Number(n)||0); }
+  function fmtDate(iso){
+    if(!iso) return "";
+    var p = iso.split("-");
+    if(p.length !== 3) return iso;
+    var d = new Date(+p[0], +p[1]-1, +p[2]);
+    return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+  }
+  function todayISO(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function inThisMonth(iso){
+    if(!iso) return false;
+    var now = new Date();
+    var p = iso.split("-");
+    return +p[0] === now.getFullYear() && +p[1] === now.getMonth()+1;
+  }
+  function isRevenue(s){ return s.status === "Completed" || s.status === "Paid"; }
+
+  var toastTimer = null;
+  function toast(msg){
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+  }
+
+  /* ---------- navigation ---------- */
+  var tabs = document.querySelectorAll("nav.tabs button");
+  function show(view){
+    tabs.forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.view === view)); });
+    document.querySelectorAll("section.view").forEach(function(s){
+      s.classList.toggle("active", s.id === "view-" + view);
+    });
+    if(view !== "new" && editingId){ resetForm(); }
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(b){ b.addEventListener("click", function(){ show(b.dataset.view); }); });
+
+  /* ---------- form ---------- */
+  var form = document.getElementById("sale-form");
+  form.elements.date.value = todayISO();
+
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var f = form.elements;
+    if(!f.employee.value.trim() || !f.customer.value.trim() || f.price.value === ""){
+      toast("Fill in salesperson, customer, and price"); return;
+    }
+    var now = new Date().toISOString();
+    var rec = {
+      id: editingId || uid(),
+      date: f.date.value || todayISO(),
+      employee: f.employee.value.trim(),
+      customer: f.customer.value.trim(),
+      phone: f.phone.value.trim(),
+      email: f.email.value.trim(),
+      address: f.address.value.trim(),
+      service: f.service.value,
+      price: Math.max(0, parseFloat(f.price.value) || 0),
+      cost: Math.max(0, parseFloat(f.cost.value) || 0),
+      status: f.status.value,
+      notes: f.notes.value.trim(),
+      updatedAt: now,
+      createdAt: now
+    };
+    if(editingId){
+      var i = sales.findIndex(function(s){ return s.id === editingId; });
+      if(i >= 0){ rec.createdAt = sales[i].createdAt || now; sales[i] = rec; }
+      toast("Sale updated");
+      resetForm();
+      persist(); renderAll(); show("sales");
+    }else{
+      sales.push(rec);
+      persist(); renderAll();
+      toast("Sale saved — " + rec.customer + ", " + money(rec.price));
+      var keepEmp = f.employee.value;
+      form.reset();
+      f.employee.value = keepEmp;
+      f.date.value = todayISO();
+      f.customer.focus();
+    }
+  });
+
+  function resetForm(){
+    editingId = null;
+    form.reset();
+    form.elements.date.value = todayISO();
+    document.getElementById("form-title").textContent = "Log a sale";
+    document.getElementById("save-btn").textContent = "Save sale";
+    document.getElementById("cancel-edit").hidden = true;
+  }
+  document.getElementById("cancel-edit").addEventListener("click", function(){
+    resetForm(); show("sales");
+  });
+
+  function startEdit(id){
+    var s = sales.find(function(x){ return x.id === id; });
+    if(!s) return;
+    editingId = id;
+    var f = form.elements;
+    f.employee.value = s.employee; f.date.value = s.date;
+    f.customer.value = s.customer; f.phone.value = s.phone || "";
+    f.email.value = s.email || ""; f.address.value = s.address || "";
+    f.service.value = s.service || "Exterior windows";
+    f.price.value = s.price; f.cost.value = s.cost || "";
+    f.status.value = s.status; f.notes.value = s.notes || "";
+    document.getElementById("form-title").textContent = "Edit sale";
+    document.getElementById("save-btn").textContent = "Save changes";
+    document.getElementById("cancel-edit").hidden = false;
+    show("new");
+  }
+
+  /* ---------- dashboard ---------- */
+  function renderTiles(){
+    var mRev = 0, mCost = 0, mJobs = 0, owed = 0, pipeline = 0;
+    sales.forEach(function(s){
+      if(inThisMonth(s.date)){
+        mJobs++;
+        if(isRevenue(s)){ mRev += s.price; mCost += (s.cost || 0); }
+      }
+      if(s.status === "Completed") owed += s.price;
+      if(s.status === "Lead" || s.status === "Quoted" || s.status === "Scheduled") pipeline += s.price;
+    });
+    var custCount = Object.keys(groupCustomers()).length;
+    document.getElementById("tiles").innerHTML =
+      tile("Revenue this month", money(mRev), "Completed + Paid") +
+      tile("Profit this month", money(mRev - mCost), "After " + money(mCost) + " job costs") +
+      tile("Sales this month", String(mJobs), "All statuses") +
+      tile("Awaiting payment", money(owed), "Completed, not yet paid") +
+      tile("Pipeline", money(pipeline), custCount + (custCount === 1 ? " customer" : " customers") + " on file");
+  }
+  function tile(label, value, hint){
+    return '<div class="tile"><div class="label">' + esc(label) + '</div>' +
+      '<div class="value num">' + esc(value) + '</div>' +
+      '<div class="hint">' + esc(hint) + '</div></div>';
+  }
+
+  function renderLeaderboard(){
+    var byEmp = {};
+    sales.forEach(function(s){
+      if(!isRevenue(s)) return;
+      if(lbRange === "month" && !inThisMonth(s.date)) return;
+      var k = s.employee || "—";
+      if(!byEmp[k]) byEmp[k] = {rev:0, jobs:0};
+      byEmp[k].rev += s.price; byEmp[k].jobs++;
+    });
+    var rows = Object.keys(byEmp).map(function(k){ return {name:k, rev:byEmp[k].rev, jobs:byEmp[k].jobs}; })
+      .sort(function(a,b){ return b.rev - a.rev; });
+    var el = document.getElementById("leaderboard");
+    if(!rows.length){
+      el.innerHTML = '<div class="empty">No completed jobs ' + (lbRange === "month" ? "this month yet" : "yet") + '. They’ll show up here.</div>';
+      return;
+    }
+    var max = rows[0].rev || 1;
+    el.innerHTML = rows.map(function(r){
+      var pct = Math.max(2, Math.round(r.rev / max * 100));
+      return '<div class="barrow">' +
+        '<div class="toprow"><span class="name">' + esc(r.name) + '</span>' +
+        '<span class="val num">' + money(r.rev) + ' · ' + r.jobs + (r.jobs === 1 ? " job" : " jobs") + '</span></div>' +
+        '<div class="bartrack"><div class="barfill" style="width:' + pct + '%"></div></div>' +
+        '</div>';
+    }).join("");
+  }
+  document.getElementById("lb-month").addEventListener("click", function(){ setLb("month"); });
+  document.getElementById("lb-all").addEventListener("click", function(){ setLb("all"); });
+  function setLb(r){
+    lbRange = r;
+    document.getElementById("lb-month").setAttribute("aria-pressed", String(r === "month"));
+    document.getElementById("lb-all").setAttribute("aria-pressed", String(r === "all"));
+    renderLeaderboard();
+  }
+
+  function renderRecent(){
+    var el = document.getElementById("recent");
+    var rows = sales.slice().sort(function(a,b){ return (b.createdAt||"").localeCompare(a.createdAt||""); }).slice(0,6);
+    if(!rows.length){
+      el.innerHTML = '<div class="empty">No sales yet. Tap <strong>+ New Sale</strong> to log the first one.</div>';
+      return;
+    }
+    el.innerHTML = rows.map(function(s){ return saleCard(s, false); }).join("");
+    wireSaleButtons(el);
+  }
+
+  /* ---------- sales list ---------- */
+  function saleCard(s, withActions){
+    var meta = [esc(s.employee), esc(s.service), esc(fmtDate(s.date))];
+    if(s.address) meta.push(esc(s.address));
+    if(s.phone) meta.push(esc(s.phone));
+    if(s.cost > 0) meta.push('<span class="num">cost ' + money(s.cost) + ' · profit ' + money(s.price - s.cost) + '</span>');
+    return '<div class="sale" data-id="' + esc(s.id) + '">' +
+      '<div class="top"><span class="who">' + esc(s.customer) + '</span>' +
+      '<span class="price num">' + money(s.price) + '</span></div>' +
+      '<div class="meta"><span class="pill ' + esc(s.status) + '">' + esc(s.status) + '</span> ' + meta.join(" · ") + '</div>' +
+      (s.notes ? '<div class="notes">' + esc(s.notes) + '</div>' : "") +
+      (withActions ?
+        '<div class="actions">' +
+        (s.status !== "Paid" ? '<button class="btn small" data-act="paid">Mark paid</button>' : "") +
+        '<button class="btn small" data-act="edit">Edit</button>' +
+        '<button class="btn small danger" data-act="del">Delete</button>' +
+        '</div>' : "") +
+      '</div>';
+  }
+  function wireSaleButtons(scope){
+    scope.querySelectorAll("[data-act]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = b.closest(".sale").dataset.id;
+        var act = b.dataset.act;
+        if(act === "edit"){ startEdit(id); }
+        else if(act === "paid"){
+          var s = sales.find(function(x){ return x.id === id; });
+          if(s){ s.status = "Paid"; s.updatedAt = new Date().toISOString(); persist(); renderAll(); toast("Marked paid — " + money(s.price)); }
+        }
+        else if(act === "del"){
+          var t = sales.find(function(x){ return x.id === id; });
+          if(t && window.confirm("Delete this sale for " + t.customer + " (" + money(t.price) + ")? This can’t be undone on this device.")){
+            sales = sales.filter(function(x){ return x.id !== id; });
+            persist(); renderAll(); toast("Sale deleted");
+          }
+        }
+      });
+    });
+  }
+
+  function renderSales(){
+    var q = document.getElementById("f-search").value.trim().toLowerCase();
+    var fe = document.getElementById("f-emp").value;
+    var fs = document.getElementById("f-status").value;
+    var rows = sales.filter(function(s){
+      if(fe && s.employee !== fe) return false;
+      if(fs && s.status !== fs) return false;
+      if(q){
+        var hay = [s.customer, s.address, s.notes, s.employee, s.phone, s.email, s.service].join(" ").toLowerCase();
+        if(hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||"") || (b.createdAt||"").localeCompare(a.createdAt||""); });
+
+    var el = document.getElementById("sales-list");
+    if(!rows.length){
+      el.innerHTML = '<div class="empty">' + (sales.length ? "Nothing matches those filters." : "No sales yet. Tap <strong>+ New Sale</strong> to log the first one.") + '</div>';
+      return;
+    }
+    var total = rows.reduce(function(a,s){ return a + s.price; }, 0);
+    el.innerHTML = '<p class="note num" style="margin:0">' + rows.length + (rows.length === 1 ? " sale" : " sales") + ' · ' + money(total) + ' total</p>' +
+      rows.map(function(s){ return saleCard(s, true); }).join("");
+    wireSaleButtons(el);
+  }
+  ["f-search","f-emp","f-status"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", renderSales);
+  });
+
+  /* ---------- customers ---------- */
+  function custKey(s){
+    return (s.customer||"").trim().toLowerCase() + "|" + (s.address||"").trim().toLowerCase();
+  }
+  function groupCustomers(){
+    var g = {};
+    sales.forEach(function(s){
+      var k = custKey(s);
+      if(!k || k === "|") return;
+      if(!g[k]) g[k] = [];
+      g[k].push(s);
+    });
+    return g;
+  }
+  function renderCustomers(){
+    var q = document.getElementById("c-search").value.trim().toLowerCase();
+    var g = groupCustomers();
+    var el = document.getElementById("cust-list");
+    var keys = Object.keys(g);
+    if(!keys.length){
+      el.innerHTML = '<div class="empty">Customers appear here automatically as sales are logged.</div>';
+      return;
+    }
+    var items = keys.map(function(k){
+      var list = g[k].slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+      var latest = list[0];
+      var spent = list.filter(isRevenue).reduce(function(a,s){ return a + s.price; }, 0);
+      return {name:latest.customer, latest:latest, list:list, spent:spent};
+    }).filter(function(c){
+      if(!q) return true;
+      var hay = [c.name, c.latest.address, c.latest.phone, c.latest.email].join(" ").toLowerCase();
+      return hay.indexOf(q) >= 0;
+    }).sort(function(a,b){ return (b.latest.date||"").localeCompare(a.latest.date||""); });
+
+    if(!items.length){ el.innerHTML = '<div class="empty">No customers match.</div>'; return; }
+
+    el.innerHTML = items.map(function(c){
+      var contact = [];
+      if(c.latest.address) contact.push("📍 " + esc(c.latest.address));
+      if(c.latest.phone) contact.push("☎ " + esc(c.latest.phone));
+      if(c.latest.email) contact.push("✉ " + esc(c.latest.email));
+      return '<details class="cust"><summary>' +
+        '<span class="who" style="font-weight:700">' + esc(c.name) + '</span>' +
+        '<span class="num" style="color:var(--ink2);font-size:13px">' + c.list.length + (c.list.length === 1 ? " job" : " jobs") + ' · ' + money(c.spent) + '</span>' +
+        '</summary><div class="body">' +
+        '<div class="cmeta">' + (contact.length ? contact.join("<br>") : "No contact info on file") + '</div>' +
+        '<div class="hist">' + c.list.map(function(s){
+          return '<div class="h"><span>' + esc(fmtDate(s.date)) + ' · ' + esc(s.service) + ' · ' + esc(s.employee) + '</span>' +
+            '<span class="num"><span class="pill ' + esc(s.status) + '">' + esc(s.status) + '</span> ' + money(s.price) + '</span></div>';
+        }).join("") + '</div>' +
+        '</div></details>';
+    }).join("");
+  }
+  document.getElementById("c-search").addEventListener("input", renderCustomers);
+
+  /* ---------- employee dropdowns ---------- */
+  function renderEmployeeOptions(){
+    var names = [];
+    sales.forEach(function(s){ if(s.employee && names.indexOf(s.employee) < 0) names.push(s.employee); });
+    names.sort(function(a,b){ return a.localeCompare(b); });
+    document.getElementById("emp-list").innerHTML =
+      names.map(function(n){ return '<option value="' + esc(n) + '"></option>'; }).join("");
+    var sel = document.getElementById("f-emp");
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">Everyone</option>' +
+      names.map(function(n){ return '<option' + (n === cur ? " selected" : "") + '>' + esc(n) + '</option>'; }).join("");
+  }
+
+  /* ---------- export / import ---------- */
+  function saveFile(filename, data){
+    if(window.claude && window.claude.downloads){
+      window.claude.downloads.save({filename:filename, data:data}).then(function(){
+        toast("Saved " + filename);
+      }).catch(function(err){
+        if(err && err.code === "declined") return;
+        blobFallback(filename, data);
+      });
+    }else{
+      blobFallback(filename, data);
+    }
+  }
+  function blobFallback(filename, data){
+    try{
+      var url = URL.createObjectURL(new Blob([data],{type:"application/octet-stream"}));
+      var a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    }catch(e){ toast("Download isn’t available here"); }
+  }
+
+  document.getElementById("btn-backup").addEventListener("click", function(){
+    if(!sales.length){ toast("Nothing to back up yet"); return; }
+    var payload = JSON.stringify({app:"window-washing-tracker", version:1, exportedAt:new Date().toISOString(), sales:sales}, null, 2);
+    saveFile("window-washing-backup-" + todayISO() + ".json", payload);
+  });
+
+  document.getElementById("btn-csv").addEventListener("click", function(){
+    if(!sales.length){ toast("Nothing to export yet"); return; }
+    function cell(v){
+      v = String(v == null ? "" : v);
+      return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+    }
+    var head = ["Date","Salesperson","Customer","Phone","Email","Address","Service","Price","Cost","Profit","Status","Notes"];
+    var lines = [head.join(",")].concat(
+      sales.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }).map(function(s){
+        var cost = s.cost || 0;
+        return [s.date, s.employee, s.customer, s.phone, s.email, s.address, s.service, s.price, cost, s.price - cost, s.status, s.notes].map(cell).join(",");
+      })
+    );
+    saveFile("window-washing-sales-" + todayISO() + ".txt", lines.join("\n"));
+  });
+
+  document.getElementById("import-file").addEventListener("change", function(ev){
+    var file = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var out = document.getElementById("import-result");
+      try{
+        var obj = JSON.parse(reader.result);
+        var incoming = Array.isArray(obj) ? obj : obj.sales;
+        if(!Array.isArray(incoming)) throw new Error("bad shape");
+        var byId = {};
+        sales.forEach(function(s){ byId[s.id] = s; });
+        var added = 0, updated = 0, skipped = 0;
+        incoming.forEach(function(s){
+          if(!s || !s.id || !s.customer) { skipped++; return; }
+          s.price = Number(s.price) || 0;
+          s.cost = Number(s.cost) || 0;
+          if(STATUSES.indexOf(s.status) < 0) s.status = "Lead";
+          var mine = byId[s.id];
+          if(!mine){ byId[s.id] = s; added++; }
+          else if((s.updatedAt||"") > (mine.updatedAt||"")){ byId[s.id] = s; updated++; }
+          else skipped++;
+        });
+        sales = Object.keys(byId).map(function(k){ return byId[k]; });
+        persist(); renderAll();
+        out.textContent = "Merged: " + added + " new, " + updated + " updated, " + skipped + " already up to date.";
+        toast("Import complete");
+      }catch(e){
+        out.textContent = "That file didn’t look like a backup from this app. Use a .json file made with “Backup file”.";
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("btn-wipe").addEventListener("click", function(){
+    if(!sales.length){ toast("Nothing to erase"); return; }
+    if(window.confirm("Erase ALL " + sales.length + " sales stored on this device? Make a backup first if you’re not sure.")){
+      sales = []; persist(); renderAll(); toast("All data erased on this device");
+    }
+  });
+
+  /* ---------- render ---------- */
+  function renderAll(){
+    renderTiles();
+    renderLeaderboard();
+    renderRecent();
+    renderSales();
+    renderCustomers();
+    renderEmployeeOptions();
+  }
+  renderAll();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</html>
