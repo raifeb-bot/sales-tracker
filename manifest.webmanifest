@@ -1,7 +1,7 @@
 {
-  "name": "Window Washing Tracker",
-  "short_name": "Sales Tracker",
-  "description": "Customer and sales tracker for the window washing crew",
+  "name": "Grit Window Washing Tracker",
+  "short_name": "Grit Tracker",
+  "description": "Customer and sales tracker for the Grit window washing crew",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
