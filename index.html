@@ -6,7 +6,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icon-180.png"><title>Window Washing Sales Tracker</title>
+<link rel="apple-touch-icon" href="icon-180.png"><title>Grit Window Washing Tracker</title>
 <style>
   :root{
     --bg:#F2F6F9; --surface:#FFFFFF; --surface2:#E9F0F5;
@@ -198,7 +198,7 @@
 
 <header class="app">
   <div class="brandrow">
-    <h1>Window Washing Tracker</h1>
+    <h1>Grit Window Washing Tracker</h1>
     <span class="sub">Customers &amp; Sales</span>
   </div>
   <nav class="tabs" role="tablist">
@@ -238,8 +238,11 @@
         <label class="field">Your name (salesperson)
           <input name="employee" list="emp-list" required placeholder="e.g. Asher" autocomplete="off">
         </label>
-        <label class="field">Date
-          <input name="date" type="date" required>
+        <label class="field">Date &amp; service time
+          <div style="display:flex;gap:8px">
+            <input name="date" type="date" required style="flex:1.2">
+            <input name="time" type="time" style="flex:1">
+          </div>
         </label>
       </div>
       <div class="row2">
@@ -408,6 +411,14 @@
   }
   var fmtUSD = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
   function money(n){ return fmtUSD.format(Number(n)||0); }
+  function fmtTime(t){
+    if(!t) return "";
+    var p = t.split(":");
+    var h = +p[0], m = p[1] || "00";
+    var ap = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return h + ":" + m + " " + ap;
+  }
   function fmtDate(iso){
     if(!iso) return "";
     var p = iso.split("-");
@@ -463,6 +474,7 @@
     var rec = {
       id: editingId || uid(),
       date: f.date.value || todayISO(),
+      time: f.time.value || "",
       employee: f.employee.value.trim(),
       customer: f.customer.value.trim(),
       phone: f.phone.value.trim(),
@@ -511,7 +523,7 @@
     if(!s) return;
     editingId = id;
     var f = form.elements;
-    f.employee.value = s.employee; f.date.value = s.date;
+    f.employee.value = s.employee; f.date.value = s.date; f.time.value = s.time || "";
     f.customer.value = s.customer; f.phone.value = s.phone || "";
     f.email.value = s.email || ""; f.address.value = s.address || "";
     f.service.value = s.service || "Exterior windows";
@@ -596,7 +608,7 @@
 
   /* ---------- sales list ---------- */
   function saleCard(s, withActions){
-    var meta = [esc(s.employee), esc(s.service), esc(fmtDate(s.date))];
+    var meta = [esc(s.employee), esc(s.service), esc(fmtDate(s.date)) + (s.time ? " at " + esc(fmtTime(s.time)) : "")];
     if(s.address) meta.push(esc(s.address));
     if(s.phone) meta.push(esc(s.phone));
     if(s.cost > 0) meta.push('<span class="num">cost ' + money(s.cost) + ' · profit ' + money(s.price - s.cost) + '</span>');
@@ -765,11 +777,11 @@
       v = String(v == null ? "" : v);
       return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
     }
-    var head = ["Date","Salesperson","Customer","Phone","Email","Address","Service","Price","Cost","Profit","Status","Notes"];
+    var head = ["Date","Time","Salesperson","Customer","Phone","Email","Address","Service","Price","Cost","Profit","Status","Notes"];
     var lines = [head.join(",")].concat(
       active().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }).map(function(s){
         var cost = s.cost || 0;
-        return [s.date, s.employee, s.customer, s.phone, s.email, s.address, s.service, s.price, cost, s.price - cost, s.status, s.notes].map(cell).join(",");
+        return [s.date, s.time || "", s.employee, s.customer, s.phone, s.email, s.address, s.service, s.price, cost, s.price - cost, s.status, s.notes].map(cell).join(",");
       })
     );
     saveFile("window-washing-sales-" + todayISO() + ".txt", lines.join("\n"));
