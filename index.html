@@ -338,9 +338,11 @@
           <button class="btn" id="btn-savekey">Save key</button>
           <button class="btn primary" id="btn-sync">Sync now</button>
         </div>
-        <p class="note" style="margin:0">Enter the team key once on this phone (the owner has it).
-        After that, every sale automatically uploads and downloads about once a minute whenever
-        you're online, so the whole crew — and the owner's dashboard — sees the same numbers.</p>
+        <p class="note" style="margin:0">Enter your key once on this phone — employees use the
+        <strong>crew key</strong>, the owner uses the <strong>owner key</strong> (ask the owner
+        if you don't have it). After that, every sale automatically uploads and downloads about
+        once a minute whenever you're online. Crew members can add sales and change only their
+        own entries; the owner can edit everything.</p>
       </div>
       <div class="card stack">
         <h3>How your data is stored</h3>
@@ -404,6 +406,10 @@
     return (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
       : "id-" + Date.now() + "-" + Math.random().toString(36).slice(2,10);
   }
+  var DEVICE_ID = localStorage.getItem("wwt_device");
+  if(!DEVICE_ID){ DEVICE_ID = uid(); localStorage.setItem("wwt_device", DEVICE_ID); }
+  var role = localStorage.getItem("wwt_role") || "owner";
+  function canEdit(s){ return role === "owner" || (s.deviceId && s.deviceId === DEVICE_ID); }
   function esc(s){
     return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
@@ -485,12 +491,13 @@
       cost: Math.max(0, parseFloat(f.cost.value) || 0),
       status: f.status.value,
       notes: f.notes.value.trim(),
+      deviceId: DEVICE_ID,
       updatedAt: now,
       createdAt: now
     };
     if(editingId){
       var i = sales.findIndex(function(s){ return s.id === editingId; });
-      if(i >= 0){ rec.createdAt = sales[i].createdAt || now; sales[i] = rec; }
+      if(i >= 0){ rec.createdAt = sales[i].createdAt || now; rec.deviceId = sales[i].deviceId; sales[i] = rec; }
       toast("Sale updated");
       resetForm();
       markDirty(rec.id); persist(); renderAll(); show("sales");
@@ -617,7 +624,7 @@
       '<span class="price num">' + money(s.price) + '</span></div>' +
       '<div class="meta"><span class="pill ' + esc(s.status) + '">' + esc(s.status) + '</span> ' + meta.join(" · ") + '</div>' +
       (s.notes ? '<div class="notes">' + esc(s.notes) + '</div>' : "") +
-      (withActions ?
+      (withActions && canEdit(s) ?
         '<div class="actions">' +
         (s.status !== "Paid" ? '<button class="btn small" data-act="paid">Mark paid</button>' : "") +
         '<button class="btn small" data-act="edit">Edit</button>' +
@@ -861,7 +868,7 @@
     var dirtyIds = getDirty();
     var toPush = sales.filter(function(s){ return dirtyIds.indexOf(s.id) >= 0; });
     var push = toPush.length
-      ? fetch(SYNC_URL, {method:"POST", body: JSON.stringify({key:key, sales:toPush})})
+      ? fetch(SYNC_URL, {method:"POST", body: JSON.stringify({key:key, deviceId:DEVICE_ID, sales:toPush})})
           .then(function(r){ return r.json(); })
           .then(function(res){
             if(res && res.ok){ clearDirty(toPush.map(function(s){ return s.id; })); }
@@ -884,8 +891,15 @@
           sales = Object.keys(byId).map(function(k){ return byId[k]; });
           persist(); renderAll();
         }
+        var newRole = data.role || "owner";
+        if(newRole !== role){
+          role = newRole;
+          localStorage.setItem("wwt_role", newRole);
+          renderAll();
+        }
         setSyncStatus("Synced with the team — up to date as of " +
-          new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}) + ".");
+          new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}) +
+          (role === "crew" ? " (crew access)" : " (owner access)") + ".");
       })
       .catch(function(e){
         if(String(e && e.message).indexOf("bad key") >= 0){
