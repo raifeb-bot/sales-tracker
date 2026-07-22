@@ -328,14 +328,24 @@
     <h2>Data &amp; team sharing</h2>
     <div class="stack">
       <div class="card stack">
-        <h3>How sharing works</h3>
+        <h3>Live team sync</h3>
+        <p class="note" id="sync-status" style="margin:0">Checking sync…</p>
+        <div class="btnrow">
+          <input id="sync-key" placeholder="Team key" autocomplete="off" style="max-width:220px">
+          <button class="btn" id="btn-savekey">Save key</button>
+          <button class="btn primary" id="btn-sync">Sync now</button>
+        </div>
+        <p class="note" style="margin:0">Enter the team key once on this phone (the owner has it).
+        After that, every sale automatically uploads and downloads about once a minute whenever
+        you're online, so the whole crew — and the owner's dashboard — sees the same numbers.</p>
+      </div>
+      <div class="card stack">
+        <h3>How your data is stored</h3>
         <p class="note" style="margin:0">
-          Everything you enter is saved <strong>on this device</strong> automatically — it stays put
-          when you close and reopen the app. Entries are <strong>not synced live</strong> between
-          phones. To combine the team's numbers: each person taps <strong>Backup file</strong> below
-          and texts or emails it over, then the owner taps <strong>Import &amp; merge</strong> on
-          their device. Merging is safe to repeat — duplicates are matched up, and the newest edit
-          of each sale wins.
+          Every sale saves <strong>on this device</strong> instantly, even with no signal, and syncs
+          to the team when you're back online. The backup buttons below are your safety net: export
+          everything as a file, or merge in a teammate's file by hand. Merging is safe to repeat —
+          duplicates are matched up, and the newest edit of each sale wins.
         </p>
       </div>
       <div class="card stack">
@@ -416,6 +426,7 @@
     return +p[0] === now.getFullYear() && +p[1] === now.getMonth()+1;
   }
   function isRevenue(s){ return s.status === "Completed" || s.status === "Paid"; }
+  function active(){ return sales.filter(function(s){ return !s.deleted; }); }
 
   var toastTimer = null;
   function toast(msg){
@@ -470,10 +481,10 @@
       if(i >= 0){ rec.createdAt = sales[i].createdAt || now; sales[i] = rec; }
       toast("Sale updated");
       resetForm();
-      persist(); renderAll(); show("sales");
+      markDirty(rec.id); persist(); renderAll(); show("sales");
     }else{
       sales.push(rec);
-      persist(); renderAll();
+      markDirty(rec.id); persist(); renderAll();
       toast("Sale saved — " + rec.customer + ", " + money(rec.price));
       var keepEmp = f.employee.value;
       form.reset();
@@ -515,7 +526,7 @@
   /* ---------- dashboard ---------- */
   function renderTiles(){
     var mRev = 0, mCost = 0, mJobs = 0, owed = 0, pipeline = 0;
-    sales.forEach(function(s){
+    active().forEach(function(s){
       if(inThisMonth(s.date)){
         mJobs++;
         if(isRevenue(s)){ mRev += s.price; mCost += (s.cost || 0); }
@@ -539,7 +550,7 @@
 
   function renderLeaderboard(){
     var byEmp = {};
-    sales.forEach(function(s){
+    active().forEach(function(s){
       if(!isRevenue(s)) return;
       if(lbRange === "month" && !inThisMonth(s.date)) return;
       var k = s.employee || "—";
@@ -574,7 +585,7 @@
 
   function renderRecent(){
     var el = document.getElementById("recent");
-    var rows = sales.slice().sort(function(a,b){ return (b.createdAt||"").localeCompare(a.createdAt||""); }).slice(0,6);
+    var rows = active().sort(function(a,b){ return (b.createdAt||"").localeCompare(a.createdAt||""); }).slice(0,6);
     if(!rows.length){
       el.innerHTML = '<div class="empty">No sales yet. Tap <strong>+ New Sale</strong> to log the first one.</div>';
       return;
@@ -610,13 +621,13 @@
         if(act === "edit"){ startEdit(id); }
         else if(act === "paid"){
           var s = sales.find(function(x){ return x.id === id; });
-          if(s){ s.status = "Paid"; s.updatedAt = new Date().toISOString(); persist(); renderAll(); toast("Marked paid — " + money(s.price)); }
+          if(s){ s.status = "Paid"; s.updatedAt = new Date().toISOString(); markDirty(s.id); persist(); renderAll(); toast("Marked paid — " + money(s.price)); }
         }
         else if(act === "del"){
           var t = sales.find(function(x){ return x.id === id; });
-          if(t && window.confirm("Delete this sale for " + t.customer + " (" + money(t.price) + ")? This can’t be undone on this device.")){
-            sales = sales.filter(function(x){ return x.id !== id; });
-            persist(); renderAll(); toast("Sale deleted");
+          if(t && window.confirm("Delete this sale for " + t.customer + " (" + money(t.price) + ")?")){
+            t.deleted = true; t.updatedAt = new Date().toISOString();
+            markDirty(t.id); persist(); renderAll(); toast("Sale deleted");
           }
         }
       });
@@ -627,7 +638,7 @@
     var q = document.getElementById("f-search").value.trim().toLowerCase();
     var fe = document.getElementById("f-emp").value;
     var fs = document.getElementById("f-status").value;
-    var rows = sales.filter(function(s){
+    var rows = active().filter(function(s){
       if(fe && s.employee !== fe) return false;
       if(fs && s.status !== fs) return false;
       if(q){
@@ -639,7 +650,7 @@
 
     var el = document.getElementById("sales-list");
     if(!rows.length){
-      el.innerHTML = '<div class="empty">' + (sales.length ? "Nothing matches those filters." : "No sales yet. Tap <strong>+ New Sale</strong> to log the first one.") + '</div>';
+      el.innerHTML = '<div class="empty">' + (active().length ? "Nothing matches those filters." : "No sales yet. Tap <strong>+ New Sale</strong> to log the first one.") + '</div>';
       return;
     }
     var total = rows.reduce(function(a,s){ return a + s.price; }, 0);
@@ -657,7 +668,7 @@
   }
   function groupCustomers(){
     var g = {};
-    sales.forEach(function(s){
+    active().forEach(function(s){
       var k = custKey(s);
       if(!k || k === "|") return;
       if(!g[k]) g[k] = [];
@@ -709,7 +720,7 @@
   /* ---------- employee dropdowns ---------- */
   function renderEmployeeOptions(){
     var names = [];
-    sales.forEach(function(s){ if(s.employee && names.indexOf(s.employee) < 0) names.push(s.employee); });
+    active().forEach(function(s){ if(s.employee && names.indexOf(s.employee) < 0) names.push(s.employee); });
     names.sort(function(a,b){ return a.localeCompare(b); });
     document.getElementById("emp-list").innerHTML =
       names.map(function(n){ return '<option value="' + esc(n) + '"></option>'; }).join("");
@@ -749,14 +760,14 @@
   });
 
   document.getElementById("btn-csv").addEventListener("click", function(){
-    if(!sales.length){ toast("Nothing to export yet"); return; }
+    if(!active().length){ toast("Nothing to export yet"); return; }
     function cell(v){
       v = String(v == null ? "" : v);
       return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
     }
     var head = ["Date","Salesperson","Customer","Phone","Email","Address","Service","Price","Cost","Profit","Status","Notes"];
     var lines = [head.join(",")].concat(
-      sales.slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }).map(function(s){
+      active().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); }).map(function(s){
         var cost = s.cost || 0;
         return [s.date, s.employee, s.customer, s.phone, s.email, s.address, s.service, s.price, cost, s.price - cost, s.status, s.notes].map(cell).join(",");
       })
@@ -806,6 +817,84 @@
     }
   });
 
+  /* ---------- live team sync ---------- */
+  var SYNC_URL = "https://script.google.com/macros/s/AKfycbwEL1uusbLscJ7qNLtjJJaTc4ITiXh9JQ4V8K6l5p8MvTcG5p5zyTvppFXPtdIrOT4x/exec";
+  function getDirty(){
+    try{ var d = JSON.parse(localStorage.getItem("wwt_dirty")); return Array.isArray(d) ? d : []; }
+    catch(e){ return []; }
+  }
+  function markDirty(id){
+    var d = getDirty();
+    if(d.indexOf(id) < 0){ d.push(id); localStorage.setItem("wwt_dirty", JSON.stringify(d)); }
+    scheduleSync();
+  }
+  function clearDirty(ids){
+    var d = getDirty().filter(function(x){ return ids.indexOf(x) < 0; });
+    localStorage.setItem("wwt_dirty", JSON.stringify(d));
+  }
+  function setSyncStatus(msg){
+    var el = document.getElementById("sync-status");
+    if(el) el.textContent = msg;
+  }
+  var syncTimer = null, syncing = false;
+  function scheduleSync(){ clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 1500); }
+  function syncNow(){
+    var key = (localStorage.getItem("wwt_key") || "").trim();
+    if(!SYNC_URL){ setSyncStatus("Live sync isn't set up yet — sales stay on this device for now."); return; }
+    if(!key){ setSyncStatus("Enter the team key below to start syncing with the rest of the crew."); return; }
+    if(!navigator.onLine){ setSyncStatus("Offline — sales are saved here and will sync when you're back online."); return; }
+    if(syncing) return;
+    syncing = true;
+    setSyncStatus("Syncing…");
+    var dirtyIds = getDirty();
+    var toPush = sales.filter(function(s){ return dirtyIds.indexOf(s.id) >= 0; });
+    var push = toPush.length
+      ? fetch(SYNC_URL, {method:"POST", body: JSON.stringify({key:key, sales:toPush})})
+          .then(function(r){ return r.json(); })
+          .then(function(res){
+            if(res && res.ok){ clearDirty(toPush.map(function(s){ return s.id; })); }
+            else { throw new Error((res && res.error) || "push failed"); }
+          })
+      : Promise.resolve();
+    push.then(function(){ return fetch(SYNC_URL + "?key=" + encodeURIComponent(key)); })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(!data || data.error){ throw new Error((data && data.error) || "bad response"); }
+        var byId = {};
+        sales.forEach(function(s){ byId[s.id] = s; });
+        var changed = 0;
+        (data.sales || []).forEach(function(s){
+          if(!s || !s.id) return;
+          var mine = byId[s.id];
+          if(!mine || String(s.updatedAt || "") > String(mine.updatedAt || "")){ byId[s.id] = s; changed++; }
+        });
+        if(changed){
+          sales = Object.keys(byId).map(function(k){ return byId[k]; });
+          persist(); renderAll();
+        }
+        setSyncStatus("Synced with the team — up to date as of " +
+          new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}) + ".");
+      })
+      .catch(function(e){
+        if(String(e && e.message).indexOf("bad key") >= 0){
+          setSyncStatus("That team key doesn't match — double-check it with the owner.");
+        }else{
+          setSyncStatus("Couldn't reach the sync server — will keep retrying in the background.");
+        }
+      })
+      .then(function(){ syncing = false; });
+  }
+  setInterval(syncNow, 60000);
+  window.addEventListener("online", syncNow);
+  document.getElementById("btn-savekey").addEventListener("click", function(){
+    var v = document.getElementById("sync-key").value.trim();
+    if(!v){ toast("Type the team key first"); return; }
+    localStorage.setItem("wwt_key", v);
+    toast("Team key saved");
+    syncNow();
+  });
+  document.getElementById("btn-sync").addEventListener("click", syncNow);
+
   /* ---------- render ---------- */
   function renderAll(){
     renderTiles();
@@ -816,6 +905,12 @@
     renderEmployeeOptions();
   }
   renderAll();
+  document.getElementById("sync-key").value = localStorage.getItem("wwt_key") || "";
+  if(!localStorage.getItem("wwt_seeded")){
+    sales.forEach(function(s){ markDirty(s.id); });
+    localStorage.setItem("wwt_seeded", "1");
+  }
+  syncNow();
 })();
 </script>
 
