@@ -2,60 +2,67 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1878C8">
+<meta name="theme-color" content="#1E2A55">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="icon-180.png"><title>Grit Window Washing Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F2F6F9; --surface:#FFFFFF; --surface2:#E9F0F5;
-    --ink:#142A3B; --ink2:#486276; --muted:#7C93A4;
-    --line:#D8E3EB; --accent:#1878C8; --accent-ink:#FFFFFF; --accent-soft:#E2EFFA;
+    --bg:#F2F6FB; --surface:#FFFFFF; --surface2:#E8EEF6;
+    --ink:#161B29; --ink2:#43537F; --muted:#7E8BA9;
+    --line:#D8E1EF; --accent:#1E2A55; --accent-ink:#FFFFFF; --accent-soft:#E2EAF8;
+    --gold:#B08A3C;
     --danger:#B3372E; --danger-soft:#F9E7E5;
-    --st-lead-bg:#E7ECF0;   --st-lead-fg:#4A6274;
-    --st-quoted-bg:#E2EFFA; --st-quoted-fg:#155F9E;
+    --st-lead-bg:#E7EBF2;   --st-lead-fg:#43537F;
+    --st-quoted-bg:#DFEAFB; --st-quoted-fg:#2456A8;
     --st-sched-bg:#FBF0D9;  --st-sched-fg:#8A5E10;
     --st-done-bg:#E0F2EA;   --st-done-fg:#1D6B4A;
-    --st-paid-bg:#1D6B4A;   --st-paid-fg:#FFFFFF;
-    --shadow:0 1px 3px rgba(20,42,59,.08);
+    --st-paid-bg:#1E2A55;   --st-paid-fg:#FFFFFF;
+    --shadow:0 1px 3px rgba(22,27,41,.08);
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#0E1B26; --surface:#152736; --surface2:#1D3347;
-      --ink:#E8F1F8; --ink2:#A7BCCC; --muted:#6E8698;
-      --line:#27415A; --accent:#4FA3E8; --accent-ink:#0B1B29; --accent-soft:#163B5C;
+      --bg:#0F1524; --surface:#182136; --surface2:#212C47;
+      --ink:#EAF0FA; --ink2:#A9B7D6; --muted:#6F7D9C;
+      --line:#2B3A5C; --accent:#8FAFE8; --accent-ink:#0F1524; --accent-soft:#22335C;
+      --gold:#CFA55B;
       --danger:#E8776C; --danger-soft:#3A1F1C;
-      --st-lead-bg:#243A4D;   --st-lead-fg:#A7BCCC;
-      --st-quoted-bg:#163B5C; --st-quoted-fg:#8FC4EE;
+      --st-lead-bg:#25304C;   --st-lead-fg:#A9B7D6;
+      --st-quoted-bg:#1B3054; --st-quoted-fg:#8FC0F0;
       --st-sched-bg:#3D3016;  --st-sched-fg:#E7C071;
       --st-done-bg:#173A2C;   --st-done-fg:#7BC9A3;
-      --st-paid-bg:#2E8B62;   --st-paid-fg:#0B1B29;
+      --st-paid-bg:#8FAFE8;   --st-paid-fg:#0F1524;
       --shadow:0 1px 3px rgba(0,0,0,.35);
     }
   }
   :root[data-theme="light"]{
-    --bg:#F2F6F9; --surface:#FFFFFF; --surface2:#E9F0F5;
-    --ink:#142A3B; --ink2:#486276; --muted:#7C93A4;
-    --line:#D8E3EB; --accent:#1878C8; --accent-ink:#FFFFFF; --accent-soft:#E2EFFA;
+    --bg:#F2F6FB; --surface:#FFFFFF; --surface2:#E8EEF6;
+    --ink:#161B29; --ink2:#43537F; --muted:#7E8BA9;
+    --line:#D8E1EF; --accent:#1E2A55; --accent-ink:#FFFFFF; --accent-soft:#E2EAF8;
+    --gold:#B08A3C;
     --danger:#B3372E; --danger-soft:#F9E7E5;
-    --st-lead-bg:#E7ECF0;   --st-lead-fg:#4A6274;
-    --st-quoted-bg:#E2EFFA; --st-quoted-fg:#155F9E;
+    --st-lead-bg:#E7EBF2;   --st-lead-fg:#43537F;
+    --st-quoted-bg:#DFEAFB; --st-quoted-fg:#2456A8;
     --st-sched-bg:#FBF0D9;  --st-sched-fg:#8A5E10;
     --st-done-bg:#E0F2EA;   --st-done-fg:#1D6B4A;
-    --st-paid-bg:#1D6B4A;   --st-paid-fg:#FFFFFF;
-    --shadow:0 1px 3px rgba(20,42,59,.08);
+    --st-paid-bg:#1E2A55;   --st-paid-fg:#FFFFFF;
+    --shadow:0 1px 3px rgba(22,27,41,.08);
   }
   :root[data-theme="dark"]{
-    --bg:#0E1B26; --surface:#152736; --surface2:#1D3347;
-    --ink:#E8F1F8; --ink2:#A7BCCC; --muted:#6E8698;
-    --line:#27415A; --accent:#4FA3E8; --accent-ink:#0B1B29; --accent-soft:#163B5C;
+    --bg:#0F1524; --surface:#182136; --surface2:#212C47;
+    --ink:#EAF0FA; --ink2:#A9B7D6; --muted:#6F7D9C;
+    --line:#2B3A5C; --accent:#8FAFE8; --accent-ink:#0F1524; --accent-soft:#22335C;
+    --gold:#CFA55B;
     --danger:#E8776C; --danger-soft:#3A1F1C;
-    --st-lead-bg:#243A4D;   --st-lead-fg:#A7BCCC;
-    --st-quoted-bg:#163B5C; --st-quoted-fg:#8FC4EE;
+    --st-lead-bg:#25304C;   --st-lead-fg:#A9B7D6;
+    --st-quoted-bg:#1B3054; --st-quoted-fg:#8FC0F0;
     --st-sched-bg:#3D3016;  --st-sched-fg:#E7C071;
     --st-done-bg:#173A2C;   --st-done-fg:#7BC9A3;
-    --st-paid-bg:#2E8B62;   --st-paid-fg:#0B1B29;
+    --st-paid-bg:#8FAFE8;   --st-paid-fg:#0F1524;
     --shadow:0 1px 3px rgba(0,0,0,.35);
   }
 
@@ -73,24 +80,58 @@
     position:sticky; top:0; z-index:20;
   }
   .brandrow{
-    max-width:960px; margin:0 auto; padding:14px 16px 6px;
-    display:flex; align-items:baseline; gap:10px;
+    max-width:960px; margin:0 auto; padding:10px 16px;
+    display:flex; align-items:center; gap:12px;
   }
-  .brandrow h1{font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em}
-  .brandrow .sub{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em}
-  nav.tabs{
-    max-width:960px; margin:0 auto; padding:0 8px;
-    display:flex; gap:2px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  .emblem{width:44px; height:44px; flex:none}
+  .brandtext{min-width:0}
+  .brandrow h1{font-size:16px; font-weight:700; margin:0; letter-spacing:-.01em; white-space:nowrap}
+  .brandrow h1 .rye{font-family:'Rye', serif; font-weight:400; font-size:20px; color:var(--accent); letter-spacing:.02em; margin-right:5px}
+  .brandrow .sub{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em}
+  .gear{
+    margin-left:auto; appearance:none; cursor:pointer; font-size:18px; line-height:1;
+    background:var(--surface2); border:1px solid var(--line); border-radius:10px; padding:8px 11px;
   }
-  nav.tabs button{
-    appearance:none; border:0; background:none; cursor:pointer;
-    font:inherit; font-size:14px; font-weight:600; color:var(--ink2);
-    padding:10px 12px 12px; border-bottom:3px solid transparent; white-space:nowrap;
-  }
-  nav.tabs button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
-  nav.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px; border-radius:6px}
+  .gear:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
 
-  main{max-width:960px; margin:0 auto; padding:18px 16px 80px}
+  nav.bottomnav{
+    position:fixed; bottom:0; left:0; right:0; z-index:40;
+    background:var(--surface); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; align-items:flex-end;
+    padding:6px 6px calc(8px + env(safe-area-inset-bottom));
+    box-shadow:0 -2px 12px rgba(22,27,41,.07);
+  }
+  nav.bottomnav button{
+    appearance:none; border:0; background:none; cursor:pointer; font:inherit;
+    font-size:11px; font-weight:700; color:var(--muted);
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:4px 10px; border-radius:10px; min-width:56px;
+  }
+  nav.bottomnav button .nicon{font-size:20px; line-height:1.2}
+  nav.bottomnav button[aria-selected="true"]{color:var(--accent)}
+  nav.bottomnav button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+  nav.bottomnav .newbtn{
+    background:var(--accent); color:var(--accent-ink); border-radius:16px;
+    padding:8px 16px 6px; margin-top:-22px; border:2px solid var(--gold);
+    box-shadow:0 5px 12px rgba(22,27,41,.28);
+  }
+  nav.bottomnav .newbtn .nicon{font-size:24px; font-weight:800}
+  nav.bottomnav .newbtn[aria-selected="true"]{color:var(--accent-ink)}
+
+  .teammate{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); padding:14px; display:flex; gap:12px; align-items:center;
+  }
+  .avatar{
+    width:48px; height:48px; border-radius:50%; flex:none;
+    background:var(--accent); color:var(--accent-ink); border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px;
+  }
+  .tinfo{flex:1; min-width:0}
+  .tname{font-weight:800; font-size:16px}
+  .tmeta{font-size:12.5px; color:var(--ink2); margin-top:1px}
+
+  main{max-width:960px; margin:0 auto; padding:18px 16px 130px}
   section.view{display:none}
   section.view.active{display:block}
   h2{font-size:21px; margin:4px 0 14px; letter-spacing:-.01em; text-wrap:balance}
@@ -198,16 +239,20 @@
 
 <header class="app">
   <div class="brandrow">
-    <h1>Grit Window Washing Tracker</h1>
-    <span class="sub">Customers &amp; Sales</span>
+    <svg class="emblem" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#161B29" stroke-width="3" stroke-dasharray="5 3"/>
+      <path d="M26 76 V52 a24 24 0 0 1 48 0 V76 Z" fill="#1E2A55"/>
+      <path d="M32 76 V52 a18 18 0 0 1 36 0 V76 Z" fill="#EAF2FB"/>
+      <path d="M32 76 V64 l9-10 7 8 7-11 13 13 v12 Z" fill="#BFD4EA"/>
+      <path d="M48 76 V40 h4 v36 Z" fill="#1E2A55"/>
+      <path d="M32 60 h36 v4 H32 Z" fill="#1E2A55"/>
+    </svg>
+    <div class="brandtext">
+      <h1><span class="rye">GRIT</span>window washing</h1>
+      <span class="sub">Sales Tracker</span>
+    </div>
+    <button class="gear" data-view="data" aria-label="Sync &amp; data settings">⚙️</button>
   </div>
-  <nav class="tabs" role="tablist">
-    <button role="tab" aria-selected="true"  data-view="dashboard">Dashboard</button>
-    <button role="tab" aria-selected="false" data-view="new">+ New Sale</button>
-    <button role="tab" aria-selected="false" data-view="sales">Sales</button>
-    <button role="tab" aria-selected="false" data-view="customers">Customers</button>
-    <button role="tab" aria-selected="false" data-view="data">Data</button>
-  </nav>
 </header>
 
 <main>
@@ -326,6 +371,12 @@
     <div class="stack" id="cust-list"></div>
   </section>
 
+  <!-- TEAM -->
+  <section class="view" id="view-team">
+    <h2>Team</h2>
+    <div class="stack" id="team-list"></div>
+  </section>
+
   <!-- DATA -->
   <section class="view" id="view-data">
     <h2>Data &amp; team sharing</h2>
@@ -379,6 +430,14 @@
     </div>
   </section>
 </main>
+
+<nav class="bottomnav" role="tablist">
+  <button role="tab" aria-selected="true"  data-view="dashboard"><span class="nicon">🏠</span>Home</button>
+  <button role="tab" aria-selected="false" data-view="sales"><span class="nicon">🧾</span>Sales</button>
+  <button role="tab" aria-selected="false" data-view="new" class="newbtn"><span class="nicon">＋</span>New Sale</button>
+  <button role="tab" aria-selected="false" data-view="customers"><span class="nicon">📇</span>Customers</button>
+  <button role="tab" aria-selected="false" data-view="team"><span class="nicon">👥</span>Team</button>
+</nav>
 
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -455,7 +514,7 @@
   }
 
   /* ---------- navigation ---------- */
-  var tabs = document.querySelectorAll("nav.tabs button");
+  var tabs = document.querySelectorAll("button[data-view]");
   function show(view){
     tabs.forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.view === view)); });
     document.querySelectorAll("section.view").forEach(function(s){
@@ -736,6 +795,51 @@
   }
   document.getElementById("c-search").addEventListener("input", renderCustomers);
 
+  /* ---------- team ---------- */
+  function renderTeam(){
+    var byEmp = {};
+    active().forEach(function(s){
+      var k = s.employee || "—";
+      if(!byEmp[k]) byEmp[k] = {rev:0, mrev:0, jobs:0, pipeline:0, last:""};
+      var e = byEmp[k];
+      if(isRevenue(s)){
+        e.rev += s.price; e.jobs++;
+        if(inThisMonth(s.date)) e.mrev += s.price;
+      }
+      if(s.status === "Lead" || s.status === "Quoted" || s.status === "Scheduled") e.pipeline += s.price;
+      if((s.date || "") > e.last) e.last = s.date;
+    });
+    var names = Object.keys(byEmp).sort(function(a,b){ return byEmp[b].rev - byEmp[a].rev; });
+    var el = document.getElementById("team-list");
+    if(!names.length){
+      el.innerHTML = '<div class="empty">Your team shows up here automatically as they log sales.</div>';
+      return;
+    }
+    el.innerHTML = names.map(function(n){
+      var e = byEmp[n];
+      var initials = n.trim().split(/\s+/).map(function(w){ return w.charAt(0); }).join("").slice(0,2).toUpperCase() || "?";
+      return '<div class="teammate" data-emp="' + esc(n) + '">' +
+        '<div class="avatar">' + esc(initials) + '</div>' +
+        '<div class="tinfo">' +
+        '<div class="tname">' + esc(n) + '</div>' +
+        '<div class="tmeta num">' + money(e.mrev) + ' this month · ' + money(e.rev) + ' all time</div>' +
+        '<div class="tmeta num">' + e.jobs + (e.jobs === 1 ? " job done" : " jobs done") + ' · ' + money(e.pipeline) + ' in the pipeline' +
+        (e.last ? ' · last sale ' + esc(fmtDate(e.last)) : '') + '</div>' +
+        '</div>' +
+        '<button class="btn small" data-actemp="view">Sales</button>' +
+        '</div>';
+    }).join("");
+    el.querySelectorAll("[data-actemp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var emp = b.closest(".teammate").dataset.emp;
+        renderEmployeeOptions();
+        document.getElementById("f-emp").value = emp;
+        renderSales();
+        show("sales");
+      });
+    });
+  }
+
   /* ---------- employee dropdowns ---------- */
   function renderEmployeeOptions(){
     var names = [];
@@ -928,6 +1032,7 @@
     renderRecent();
     renderSales();
     renderCustomers();
+    renderTeam();
     renderEmployeeOptions();
   }
   renderAll();
